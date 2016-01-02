@@ -1,0 +1,9 @@
+(function (root, factory) {
+  if (typeof define === 'function' && define.amd) {
+    // AMD.
+    define(['jquery','knockout','sammy'], factory);
+  } else {
+    // Browser globals.
+    root.komvc = factory(root.$,root.ko,root.sammy);
+  }
+}(this, function($,ko,sammy) {
