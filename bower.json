@@ -1,27 +1,24 @@
 {
   "name": "KnockoutMVC",
-  "authors": [
-    "Todd Schluechtermann <trsch2012@live.com>"
-  ],
+  "homepage": "",
   "description": "MVC Framework using Knockout.js and Sammy.js",
-  "main": "",
+  "main": "dist/knockout-mvc.js",
   "moduleType": [
-    "amd"
+    "amd",
+    "globals"
   ],
   "dependencies": {
     "knockout": "~3.4.0",
     "sammy": "~0.7.6",
     "jquery": "~2.1.4",
-    "requirejs":"~2.1.22",
-    "requirejs-text": "~2.0.14"
+    "requirejs":"~2.1.22"
   },
   "license": "MIT",
-  "homepage": "",
   "ignore": [
     "**/.*",
     "node_modules",
     "bower_components",
     "test",
-    "tests"
+    "tools"
   ]
 }
