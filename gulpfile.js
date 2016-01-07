@@ -3,6 +3,7 @@ var gulp = require('gulp'),
     buildSources = require('./tools/sources.json'),
     jshint=require('gulp-jshint'),
     gulpFilter = require('gulp-filter'),
+	uglify = require('gulp-uglify'),
     libs = [
 	'bower_components/jquery/dist/jquery.min.js',
 	'bower_components/knockout/dist/knockout.js',
@@ -26,11 +27,20 @@ gulp.task('jshint', function(){
        .pipe(jshint.reporter('jshint-stylish'));
 });
 
-gulp.task('build',['copy-libs'], function(){
+gulp.task('build.dev',['copy-libs'], function(){
 	return gulp.src(buildSources)
-        .pipe(concat('knockout-mvc.js'))
+		.pipe(concat('knockout-mvc.js'))
 		.pipe(gulp.dest('./dist/'))
 });
+
+gulp.task('build.prod',['copy-libs'], function(){
+	return gulp.src(buildSources)
+		.pipe(concat('knockout-mvc.min.js'))
+		.pipe(uglify())
+		.pipe(gulp.dest('./dist/'))
+});
+
+gulp.task('build',['build.dev','build.prod']);
 
 gulp.task('watch', function(){
    return gulp.watch(buildSources, ['build','jshint']);
