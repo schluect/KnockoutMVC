@@ -1,8 +1,6 @@
-﻿komvc.ControllerFactory = (function (BaseController) {
+﻿komvc.ControllerFactory = (function () {
     var ControllerFactory = function () {
-        this.Controllers[this._BaseControllerKey] = BaseController;
     };
-    ControllerFactory.prototype._BaseControllerKey = "##BASE##";
     ControllerFactory.prototype.Controllers = {};
     ControllerFactory.prototype.AddController = function (type, controller) {
         if (typeof controller === "undefined") {
@@ -24,7 +22,8 @@
                 }
             };
         }
-        var controller = new komvc.BaseController();
+        var controller = new komvc.Controller();
+        controller.Name = name;
         komvc.utils.forEach(actions, function(key, prop){
             controller.addAction(key, prop);
         });
@@ -41,4 +40,4 @@
         return null;
     };
     return ControllerFactory;
-})(komvc.BaseController);
+})();

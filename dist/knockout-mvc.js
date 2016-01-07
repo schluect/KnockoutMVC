@@ -35,6 +35,20 @@ komvc.utils = (function ($) {
                 $("body").append(template);
             }
         },
+        loadTemplate: function (templateId, path, callback) {
+            if ($("#" + templateId).length === 0) {
+                $.ajax(path, function(html) {
+                    var template = $("<script>");
+                    template.attr("id", templateId);
+                    template.attr("type", "script/html");
+                    template.html(html);
+                    $("body").append(template);
+                    callback();
+                });
+            } else {
+                callback();
+            }
+        },
         forEach: function(object, callback){
             for (var key in object) {
                 if (object.hasOwnProperty(key)) {
@@ -53,37 +67,41 @@ komvc.ApplicationViewModelHolder = (function (ko) {
     return function getInstance() {
         instance = instance || new ApplicationViewModelHolder();
         return instance;
-    };;
+    };
 })(komvc.ko);
-komvc.BaseController = (function (ApplicationViewModelHolder) {
-    var BaseController = function (processor) {
-        this.base = this;
+komvc.Controller = (function () {
+    var Controller = function () {};
+    Controller.prototype.Get = function (param1,param2) {
+        var view = null,
+            model = null;
+        if(typeof param1 === "string"){//is view
+            view = param1.toString();
+            model = param2;
+        } else if(typeof param1 === "object"){
+           model = param1.model;
+            view = param1.view;
+        }
+        var actionResult = new komvc.ActionResult(this.Name, view, model);
+        actionResult.Process();
     };
-    BaseController.prototype.base = null;
-    BaseController.prototype.dataProcessor = null;
-    BaseController.Get = function (view, model) {
-        ApplicationViewModelHolder().View(view);
-        ApplicationViewModelHolder().Model(model);
-    };
-    BaseController.Post = function () {
+    Controller.prototype.Post = function () {
 
     };
-    BaseController.Put = function () {
+    Controller.prototype.Put = function () {
 
     };
-    BaseController.Delete = function () {
+    Controller.prototype.Delete = function () {
 
     };
-    BaseController.prototype.addAction = function(name, action){
+    Controller.prototype.Name ="";
+    Controller.prototype.addAction = function(name, action){
         this[name] = action;
     };
-    return BaseController;
-})(komvc.ApplicationViewModelHolder);
-komvc.ControllerFactory = (function (BaseController) {
+    return Controller;
+})();
+komvc.ControllerFactory = (function () {
     var ControllerFactory = function () {
-        this.Controllers[this._BaseControllerKey] = BaseController;
     };
-    ControllerFactory.prototype._BaseControllerKey = "##BASE##";
     ControllerFactory.prototype.Controllers = {};
     ControllerFactory.prototype.AddController = function (type, controller) {
         if (typeof controller === "undefined") {
@@ -105,7 +123,8 @@ komvc.ControllerFactory = (function (BaseController) {
                 }
             };
         }
-        var controller = new komvc.BaseController();
+        var controller = new komvc.Controller();
+        controller.Name = name;
         komvc.utils.forEach(actions, function(key, prop){
             controller.addAction(key, prop);
         });
@@ -122,36 +141,32 @@ komvc.ControllerFactory = (function (BaseController) {
         return null;
     };
     return ControllerFactory;
-})(komvc.BaseController);
+})();
 komvc.RouteChangeHandler = (function (sammy) {
     var RouteChangeHandler = function (routeHandler) {
         this.RouteHandler = routeHandler;
     };
     RouteChangeHandler.prototype._SammyApp = null;
     RouteChangeHandler.prototype.RouteHandler = null;
+    RouteChangeHandler.prototype.HandleActionResult = function(result){
+        if (result.NotFound) {
+            context.notFound();
+        }
+        if (result.Error) {
+            context.error(result.Error);
+        }
+    };
     RouteChangeHandler.prototype.StartRouteChangeHandler = function () {
         var that = this;
         var app = sammy("#main", function () {
             this.get("#/:controller/:action", function (context) {
-                var action = that.RouteHandler.GetAction(context.params.controller, context.params.action);
-                if (typeof action === "undefined") {
-                    context.notFound();
-                }
-                action(context.params);
+                that.HandleActionResult(that.RouteHandler.RunAction(context.params.controller, context.params.action));
             });
             this.get("#/:controller", function (context) {
-                var action = that.RouteHandler.GetAction(context.params.controller, "index");
-                if (typeof action === "undefined") {
-                    context.notFound();
-                }
-                action(context.params);
+                that.HandleActionResult(that.RouteHandler.RunAction(context.params.controller, "index"));
             });
             this.get("#/", function (context) {
-                var action = that.RouteHandler.GetAction("home", "index");
-                if (typeof action === "undefined") {
-                    context.notFound();
-                }
-                action(context.params);
+                that.HandleActionResult(that.RouteHandler.RunAction("home", "index", context.params));
             });
         });
         app.run("#/");
@@ -168,24 +183,70 @@ komvc.RouteHandler = (function(){
         this.ControllerFactory = controllerFactory;
     };
     RouteHandler.prototype.ControllerFactory = null;
-    RouteHandler.prototype.GetAction = function (controllerName, actionName) {
-        var controller = this.ControllerFactory.GetController(controllerName + "controller");
-        if (typeof controller === "undefined") {
+    RouteHandler.prototype.ActivateController = function (controllerName) {
+        this.ActiveController = this.ControllerFactory.GetController(controllerName + "controller");
+        if (typeof this.ActiveController === "undefined") {
             return null;
         }
-        return controller[actionName];
+    };
+    RouteHandler.prototype.RunAction = function(controllerName, actionName, params){
+        try{
+            var controller = this.ControllerFactory.GetController(controllerName + "controller");
+            if (typeof controller === "undefined") {
+                return {
+                    NotFound: true
+                };
+            }
+
+            if (typeof controller[actionName] === "undefined") {
+                return {
+                    NotFound: true
+                };
+            }
+
+            controller[actionName](params);
+        }catch (e){
+            return {
+                Error: e
+            };
+        }
     };
     return RouteHandler;
 })();
-komvc.ActionResult = (function () {
-    var ActionResult = function () {
-
+komvc.ActionResult = (function (ApplicationViewModelHolder) {
+    var ActionResult = function (controller, view, model) {
+        this.ProcessView(view, controller);
+        this.Model = model;
     };
-    ActionResult.prototype.Action;
-    ActionResult.prototype.RunAction = function (params) {
+    ActionResult.prototype.ViewKey = null;
+    ActionResult.prototype.View = null;
+    ActionResult.prototype.Model = null;
+    ActionResult.prototype.ViewPath = null;
+    ActionResult.prototype.ProcessView = function(view, controller){
+        if(view !== null){
+            var splitView = view.split("/");
+            if(splitView.length > 1){
+                this.ViewPath = view;
+                this.View = splitView[splitView.length -1];
+            } else {
+                this.View = view;
+                this.ViewPath = "/views/"+controller+"/"+this.View;
+            }
 
+            if (this.ViewPath.indexOf(".html")<0){
+                this.ViewPath += ".html";
+            }
+
+            this.View = controller + "_"+this.View;
+        }
+    };
+    ActionResult.prototype.Process = function(){
+        komvc.utils.loadTemplate(this.View, this.ViewPath,function(){
+            ApplicationViewModelHolder().View(this.View);
+            ApplicationViewModelHolder().Model(this.Model);
+        });
     };
     return ActionResult;
-})();
+})(komvc.ApplicationViewModelHolder);
     return komvc;
 }));

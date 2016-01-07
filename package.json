@@ -1,15 +1,26 @@
 {
   "name": "KnockoutMVC",
-  "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "version": "0.1.0",
+  "description": "MVC Framework using Knockout.js and Sammy.js",
+  "main": "dist/knockout-mvc.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "prepublish":"gulp",
+    "test": "node test/runner.node.js"
   },
-  "author": "",
-  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/schluect/KnockoutMVC.git"
+  },
+  "bugs":"https://github.com/schluect/KnockoutMVC/issues"
+  "author": "Todd Schluechtermann",
+  "licenses": [
+    { "type": "MIT", "url": "http://www.opensource.org/licenses/mit-license.php" }
+  ],
   "devDependencies": {
     "gulp": "~3.9.0",
-    "gulp-concat":"~2.6.0"
+    "gulp-concat":"~2.6.0",
+    "gulp-jshint":"~2.0.0",
+    "jshint-stylish":"~2.1.0",
+    "gulp-filter":"~3.0.1"
   }
 }

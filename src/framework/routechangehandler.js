@@ -4,29 +4,25 @@
     };
     RouteChangeHandler.prototype._SammyApp = null;
     RouteChangeHandler.prototype.RouteHandler = null;
+    RouteChangeHandler.prototype.HandleActionResult = function(result){
+        if (result.NotFound) {
+            context.notFound();
+        }
+        if (result.Error) {
+            context.error(result.Error);
+        }
+    };
     RouteChangeHandler.prototype.StartRouteChangeHandler = function () {
         var that = this;
         var app = sammy("#main", function () {
             this.get("#/:controller/:action", function (context) {
-                var action = that.RouteHandler.GetAction(context.params.controller, context.params.action);
-                if (typeof action === "undefined") {
-                    context.notFound();
-                }
-                action(context.params);
+                that.HandleActionResult(that.RouteHandler.RunAction(context.params.controller, context.params.action));
             });
             this.get("#/:controller", function (context) {
-                var action = that.RouteHandler.GetAction(context.params.controller, "index");
-                if (typeof action === "undefined") {
-                    context.notFound();
-                }
-                action(context.params);
+                that.HandleActionResult(that.RouteHandler.RunAction(context.params.controller, "index"));
             });
             this.get("#/", function (context) {
-                var action = that.RouteHandler.GetAction("home", "index");
-                if (typeof action === "undefined") {
-                    context.notFound();
-                }
-                action(context.params);
+                that.HandleActionResult(that.RouteHandler.RunAction("home", "index", context.params));
             });
         });
         app.run("#/");

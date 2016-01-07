@@ -6,5 +6,5 @@
     return function getInstance() {
         instance = instance || new ApplicationViewModelHolder();
         return instance;
-    };;
+    };
 })(komvc.ko);
