@@ -1,9 +1,12 @@
 var gulp = require('gulp'),
     concat = require('gulp-concat'),
     buildSources = require('./tools/sources.json'),
+	testSources = require('./tools/testSources.json'),
     jshint=require('gulp-jshint'),
     gulpFilter = require('gulp-filter'),
 	uglify = require('gulp-uglify'),
+	server = require( 'gulp-develop-server'),
+	qunit = require('gulp-qunit'),
     libs = [
 	'bower_components/jquery/dist/jquery.min.js',
 	'bower_components/knockout/dist/knockout.js',
@@ -44,4 +47,14 @@ gulp.task('build',['build.dev','build.prod']);
 
 gulp.task('watch', function(){
    return gulp.watch(buildSources, ['build','jshint']);
+});
+
+gulp.task('copy-test-libs', function(){
+	return gulp.src(testSources)
+		.pipe(gulp.dest('test/libs'))
+});
+
+gulp.task('test',['copy-test-libs'], function(){
+	return gulp.src('./test/index.html')
+		.pipe(qunit())
 });
