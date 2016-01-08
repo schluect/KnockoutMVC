@@ -1,5 +1,16 @@
+sudo: required
 language: javascript
 before_script:
   - npm install -g gulp
+  - gulp lint
 
 script: gulp test
+
+# whitelist
+branches:
+  only:
+    - master
+
+notifications:
+  email:
+    - trsch2012@live.com
