@@ -6,10 +6,6 @@ before_script:
 
 script: gulp test
 
-# whitelist
-branches:
-  only:
-    - master
 
 notifications:
   email:
