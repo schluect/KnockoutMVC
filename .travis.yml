@@ -1,7 +1,7 @@
 sudo: required
 language: javascript
 before_script:
-  - npm install -g gulp
+  - npm install
   - gulp lint
 
 script: gulp test
