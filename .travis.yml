@@ -5,7 +5,54 @@ before_script:
   - gulp jshint
   - gulp build
 
-script: gulp test
+script: istanbul cover ..\node_modules\mocha\bin\_mocha --report lcovonly -- -R spec > ..\node_modules\coveralls\bin\coveralls.js
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 notifications:
