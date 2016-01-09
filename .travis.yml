@@ -3,6 +3,7 @@ language: javascript
 before_script:
   - npm install
   - gulp jshint
+  - gulp build
 
 script: gulp test
 
@@ -10,3 +11,4 @@ script: gulp test
 notifications:
   email:
     - trsch2012@live.com
+

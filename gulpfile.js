@@ -1,4 +1,5 @@
 var gulp = require('gulp'),
+	blanket = require('blanket'),
     concat = require('gulp-concat'),
     buildSources = require('./tools/sources.json'),
 	testSources = require('./tools/testSources.json'),
@@ -6,14 +7,15 @@ var gulp = require('gulp'),
     gulpFilter = require('gulp-filter'),
 	uglify = require('gulp-uglify'),
 	server = require( 'gulp-develop-server'),
-	qunit = require('gulp-qunit'),
+	coveralls = require('gulp-coveralls'),
+	mocha = require('gulp-mocha'),
     libs = [
 	'bower_components/jquery/dist/jquery.min.js',
 	'bower_components/knockout/dist/knockout.js',
 	'bower_components/requirejs/require.js',
 	'bower_components/requirejs-text/text.js',
 	'bower_components/sammy/lib/min/sammy-latest.min.js'
-];
+	];
 
 gulp.task('default',['build']);
 
@@ -55,6 +57,14 @@ gulp.task('copy-test-libs', function(){
 });
 
 gulp.task('test',['copy-test-libs'], function(){
-	return gulp.src('./test/index.html')
-		.pipe(qunit())
+	return gulp.src('test/test.js', {read: false})
+		.pipe(mocha({reporter:'mocha-lcov-reporter',require:'blanket'}))
+		.pipe(coveralls());
 });
+
+
+gulp.task('send-coverage',['test'], function(){
+	return gulp.src('test/coverage/**/lcov.info')
+		.pipe(coveralls());
+});
+
