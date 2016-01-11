@@ -1,5 +1,5 @@
 var komvc =  komvc || {};
 komvc.ko = ko;
-komvc.sammy = sammy;
+komvc.Sammy = Sammy;
 komvc.$ = jQuery;
 komvc.JSON = JSON;

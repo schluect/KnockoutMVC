@@ -1,4 +1,4 @@
-﻿komvc.RouteChangeHandler = (function (sammy) {
+﻿komvc.RouteChangeHandler = (function (Sammy) {
     var RouteChangeHandler = function (routeHandler) {
         this.RouteHandler = routeHandler;
     };
@@ -6,15 +6,15 @@
     RouteChangeHandler.prototype.RouteHandler = null;
     RouteChangeHandler.prototype.HandleActionResult = function(result){
         if (result.NotFound) {
-            context.notFound();
+            context.notFound();//WHAT IS CONTEXT
         }
         if (result.Error) {
-            context.error(result.Error);
+            context.error(result.Error);//WHAT IS CONTEXT
         }
     };
     RouteChangeHandler.prototype.StartRouteChangeHandler = function () {
         var that = this;
-        var app = sammy("#main", function () {
+        var app = Sammy("#main", function () {///MOCK SAMMY NEEDED
             this.get("#/:controller/:action", function (context) {
                 that.HandleActionResult(that.RouteHandler.RunAction(context.params.controller, context.params.action));
             });
@@ -33,4 +33,4 @@
         return this._SammyApp;
     };
     return RouteChangeHandler;
-})(komvc.sammy);
+})(komvc.Sammy);

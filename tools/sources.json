@@ -6,6 +6,7 @@
   "src/framework/controller.js",
   "src/framework/controllerfactory.js",
   "src/framework/routechangehandler.js",
+  "src/framework/run.js",
   "src/framework/routehandler/routehandler.js",
   "src/framework/actionresults/actionresult.js",
   "tools/wrap.end"
