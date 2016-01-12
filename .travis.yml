@@ -1,0 +1,14 @@
+sudo: required
+language: javascript
+before_script:
+  - npm install
+  - gulp jshint
+  - gulp build
+
+
+
+
+notifications:
+  email:
+    - trsch2012@live.com
+

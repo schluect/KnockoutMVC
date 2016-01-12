@@ -3,9 +3,10 @@
   "src/framework/namespace.js",
   "src/framework/utils.js",
   "src/framework/applicationviewmodelholder.js",
-  "src/framework/basecontroller.js",
+  "src/framework/controller.js",
   "src/framework/controllerfactory.js",
   "src/framework/routechangehandler.js",
+  "src/framework/run.js",
   "src/framework/routehandler/routehandler.js",
   "src/framework/actionresults/actionresult.js",
   "tools/wrap.end"

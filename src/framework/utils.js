@@ -21,6 +21,20 @@
                 $("body").append(template);
             }
         },
+        loadTemplate: function (templateId, path, callback) {
+            if ($("#" + templateId).length === 0) {
+                $.ajax(path, function(html) {
+                    var template = $("<script>");
+                    template.attr("id", templateId);
+                    template.attr("type", "script/html");
+                    template.html(html);
+                    $("body").append(template);
+                    callback();
+                });
+            } else {
+                callback();
+            }
+        },
         forEach: function(object, callback){
             for (var key in object) {
                 if (object.hasOwnProperty(key)) {
