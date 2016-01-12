@@ -1,11 +1,10 @@
 sudo: required
-language: javascript
+language: node_js
 before_script:
   - npm install
   - gulp jshint
-  - gulp build
 
-script:
+script: gulp build
 
 notifications:
   email:
