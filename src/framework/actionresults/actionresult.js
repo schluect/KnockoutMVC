@@ -1,4 +1,4 @@
-﻿komvc.ActionResult = (function (ApplicationViewModelHolder) {
+﻿komvc.ActionResult = (function (ApplicationViewModelHolder, $) {
     var ActionResult = function (controller, view, model) {
         this.ProcessView(view, controller);
         this.Model = model;
@@ -22,14 +22,16 @@
                 this.ViewPath += ".html";
             }
 
+            this.ViewPath = komvc.config.ViewsLocation + this.ViewPath;
             this.View = controller + "_"+this.View;
         }
     };
     ActionResult.prototype.Process = function(){
+        var that = this;
         komvc.utils.loadTemplate(this.View, this.ViewPath,function(){
-            ApplicationViewModelHolder().View(this.View);
-            ApplicationViewModelHolder().Model(this.Model);
+            ApplicationViewModelHolder().View(that.View);
+            ApplicationViewModelHolder().Model(that.Model);
         });
     };
     return ActionResult;
-})(komvc.ApplicationViewModelHolder);
+})(komvc.ApplicationViewModelHolder, komvc.$);

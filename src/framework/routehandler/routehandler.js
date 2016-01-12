@@ -6,7 +6,6 @@
     RouteHandler.prototype.ActivateController = function (controllerName) {
         this.ActiveController = this.ControllerFactory.GetController(controllerName + "controller");
         if (typeof this.ActiveController === "undefined") {
-            return null;
         }
     };
     RouteHandler.prototype.RunAction = function(controllerName, actionName, params){
@@ -24,7 +23,7 @@
                 };
             }
 
-            controller[actionName](params);
+            return controller[actionName](params);
         }catch (e){
             return {
                 Error: e

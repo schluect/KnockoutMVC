@@ -34,6 +34,11 @@ gulp.task('jshint', function(){
        .pipe(jshint.reporter('jshint-stylish'));
 });
 
+gulp.task('build.example',['build.dev'], function(){
+	return gulp.src('./dist/*')
+		.pipe(gulp.dest('./examples/lib'));
+});
+
 gulp.task('build.dev',['copy-libs'], function(){
 	return gulp.src(buildSources)
 		.pipe(concat('knockout-mvc.js'))
@@ -77,4 +82,8 @@ gulp.task('test',['copy-test-libs'], function(){
 gulp.task('send-coverage',['test'], function(){
 	return gulp.src('test/coverage/**/lcov.info')
 		.pipe(coveralls());
+});
+
+gulp.task('copy-to-examples', function(){
+
 });
