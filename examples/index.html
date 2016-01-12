@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>KnockoutMVC Examples</title>
+</head>
+<body>
+    <div data-komvc="true"></div>
+    <script src="lib/qunit.js"></script>
+    <script src="lib/jquery.min.js"></script>
+    <script src="lib/knockout.js"></script>
+    <script src="lib/sammy-latest.min.js"></script>
+    <script src="lib/knockout-mvc.js"></script>
+    <script>
+        $(function(){
+            var config = {
+                Controllers:[
+                    {
+                        name : "home",
+                        actions: {
+                            index: function index() {
+                                var model = {
+                                    title: "HOME PAGE"
+                                };
+                                return this.Get("index", model);
+                            }
+                        }
+                    }
+                ],
+                ViewsLocation: "/knockoutmvc/examples/app"
+            };
+
+            komvc.Run(config);
+        })
+    </script>
+<script type="text/html" id="home_index">
+    <h1 data-bind="text: title"></h1>
+</script>
+</body>
+</html>

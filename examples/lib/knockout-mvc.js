@@ -289,17 +289,17 @@ komvc.RouteHandler = (function(){
             var controller = this.ControllerFactory.GetController(controllerName + "controller");
             if (typeof controller === "undefined") {
                 return {
-                    NotFound: true
+                    Test: true
                 };
             }
 
             if (typeof controller[actionName] === "undefined") {
                 return {
-                    NotFound: true
+                    test2: true
                 };
             }
 
-            return controller[actionName](params);
+            controller[actionName](params);
         }catch (e){
             return {
                 Error: e
@@ -308,7 +308,7 @@ komvc.RouteHandler = (function(){
     };
     return RouteHandler;
 })();
-komvc.ActionResult = (function (ApplicationViewModelHolder, $) {
+komvc.ActionResult = (function (ApplicationViewModelHolder) {
     var ActionResult = function (controller, view, model) {
         this.ProcessView(view, controller);
         this.Model = model;
@@ -344,6 +344,6 @@ komvc.ActionResult = (function (ApplicationViewModelHolder, $) {
         });
     };
     return ActionResult;
-})(komvc.ApplicationViewModelHolder, komvc.$);
+})(komvc.ApplicationViewModelHolder);
     return komvc;
 }));
