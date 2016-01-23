@@ -13,6 +13,14 @@
     <script src="lib/knockout-mvc.js"></script>
     <script>
         $(function(){
+            Controller("Test", function(Action){
+               Action("TestAction", function(){
+                   var model = {
+                       title: "HOME PAGE"
+                   };
+                   return this.Get("index", model);
+               })
+            });
             var config = {
                 Controllers:[
                     {

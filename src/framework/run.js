@@ -1,8 +1,5 @@
 komvc.Run = (function($){
-    var controllerFactory = null,
-    routeHandler = null,
-    routeChangeHandler = null,
-    defaultAppSelector = '[data-komvc=true]';
+    var defaultAppSelector = '[data-komvc=true]';
     var run = function(config){
         $.extend(komvc.config, config);
         komvc.config.AppContainer =  $(komvc.config.AppSelector);
@@ -30,11 +27,17 @@ komvc.Run = (function($){
             });
         }
     },
+    processPreloadedControllers = function(){
+      if (typeof preLoadedControllers === "object"){
+          for(var key in preLoadedControllers){
+              var actions = preLoadedControllers[key];
+              controllerFactory.CreateController(key, actions);
+          }
+      }
+    },
     init = function(config){
         controllerFactory = new komvc.ControllerFactory();
-        $.each(config.Controllers, function (i, c) {
-            controllerFactory.CreateController(c.name, c.actions);
-        });
+        processPreloadedControllers();
         routeHandler = new komvc.RouteHandler(controllerFactory);
         routeChangeHandler = new komvc.RouteChangeHandler(routeHandler);
         routeChangeHandler.StartRouteChangeHandler(komvc.config.CustomRoutes);
