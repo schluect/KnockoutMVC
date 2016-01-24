@@ -6,43 +6,40 @@
 </head>
 <body>
     <div data-komvc="true"></div>
-    <script src="lib/qunit.js"></script>
     <script src="lib/jquery.min.js"></script>
     <script src="lib/knockout.js"></script>
     <script src="lib/sammy-latest.min.js"></script>
     <script src="lib/knockout-mvc.js"></script>
+    <script src="app/controllers/homecontroller.js"></script>
+    <script src="app/controllers/testcontroller.js"></script>
     <script>
         $(function(){
-            Controller("Test", function(Action){
-               Action("TestAction", function(){
-                   var model = {
-                       title: "HOME PAGE"
-                   };
-                   return this.Get("index", model);
-               })
-            });
             var config = {
-                Controllers:[
-                    {
-                        name : "home",
-                        actions: {
-                            index: function index() {
-                                var model = {
-                                    title: "HOME PAGE"
-                                };
-                                return this.Get("index", model);
-                            }
-                        }
-                    }
-                ],
-                ViewsLocation: "/knockoutmvc/examples/app"
+                ViewsLocation: "/knockoutmvc/examples/app",
+
             };
 
             komvc.Run(config);
         })
     </script>
-<script type="text/html" id="home_index">
-    <h1 data-bind="text: title"></h1>
-</script>
+    <script type="text/html" id="home_index">
+        <h1 data-bind="text: title"></h1>
+        <span>Home Index</span>
+    </script>
+    <script type="text/html" id="home_hometest">
+        <h1 data-bind="text: title"></h1>
+        <span>Home Test</span>
+        <a href="#/home">Home Page</a>
+        <a href="#/test">Test-Index Page</a>
+        <a href="#/test/test2">Test-Test2 Page</a>
+    </script>
+    <script type="text/html" id="test_index">
+        <h1 data-bind="text: title"></h1>
+        <span>Test Index</span>
+    </script>
+    <script type="text/html" id="test_test2">
+        <h1 data-bind="text: title"></h1>                                                                                                                                                                                                                                                                                                                                                                                                       c
+        <span>Test2 Test</span>
+    </script>
 </body>
 </html>

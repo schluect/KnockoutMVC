@@ -39,13 +39,13 @@ gulp.task('build.example',['build.dev'], function(){
 		.pipe(gulp.dest('./examples/lib'));
 });
 
-gulp.task('build.dev',['copy-libs'], function(){
+gulp.task('build.dev',['build-komvccomponent','copy-libs'], function(){
 	return gulp.src(buildSources)
 		.pipe(concat('knockout-mvc.js'))
 		.pipe(gulp.dest('./dist/'))
 });
 
-gulp.task('build.prod',['copy-libs'], function(){
+gulp.task('build.prod',['build-komvccomponent','copy-libs'], function(){
 	return gulp.src(buildSources)
 		.pipe(concat('knockout-mvc.min.js'))
 		.pipe(uglify())
@@ -84,6 +84,17 @@ gulp.task('send-coverage',['test'], function(){
 		.pipe(coveralls());
 });
 
-gulp.task('copy-to-examples', function(){
+gulp.task('copy-to-examples',['build'], function(){
+	gulp.src("dist/*")
+		.pipe(gulp.dest('examples/lib'));
+});
 
+var replace = require('gulp-replace');
+var fs = require("fs");
+gulp.task('build-komvccomponent', function(){
+	var fileContent = fs.readFileSync("src/framework/views/component/komvccontainer.html");
+	gulp.src(['src/framework/components/mvcviewcontainer.template.js'])
+		.pipe(replace("{{view}}", fileContent))
+		.pipe(concat('mvcviewcontainer.js'))
+		.pipe(gulp.dest('src/framework/components'));
 });

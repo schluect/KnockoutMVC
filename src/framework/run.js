@@ -35,6 +35,12 @@ komvc.Run = (function($){
           }
       }
     },
+    handleAnchorClick = function(){
+        $("body").on("a[href^='#']", "click", function(){
+           var app = routeChangeHandler.GetSammyApp();
+            debugger;
+        });
+    },
     init = function(config){
         controllerFactory = new komvc.ControllerFactory();
         processPreloadedControllers();
@@ -42,7 +48,8 @@ komvc.Run = (function($){
         routeChangeHandler = new komvc.RouteChangeHandler(routeHandler);
         routeChangeHandler.StartRouteChangeHandler(komvc.config.CustomRoutes);
         $(function () {
-            komvc.config.AppContainer.attr("data-bind","template: { name: View, data: Model }");
+            handleAnchorClick();
+            komvc.config.AppContainer.append("<!-- ko if: View() !== null --><!-- ko template: { name: View, data: Model } --><!-- /ko --><!-- /ko -->");
             ko.applyBindings(komvc.ApplicationViewModelHolder(), komvc.config.AppContainer[0]);
         })
     };

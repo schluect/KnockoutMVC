@@ -22,22 +22,8 @@ komvc.config = {
 };
 var controllerFactory,
     routeHandler,
-    routeChangeHandler,
-    preLoadedControllers = {};
-Controller = function(controllerName, controllerCallback){
-    var action = function(actionName, actionCallback){
-        if(typeof preLoadedControllers[controllerName] === "undefined"){
-            preLoadedControllers[controllerName] = {};
-            preLoadedControllers[controllerName][actionName] = actionCallback;
-        } else {
-            var currentController = preLoadedControllers[controllerName];
-            if(typeof currentController[actionName] === "undefined"){
-                currentController[action] = actionCallback;
-            }
-        }
-    };
-    controllerCallback(action);
-};
+    routeChangeHandler;
+
 komvc.utils = (function ($) {
     return {
         extend: function (base, sub) {
@@ -63,7 +49,7 @@ komvc.utils = (function ($) {
         },
         loadTemplate: function (templateId, path, callback) {
             if ($("#" + templateId).length === 0) {
-                $.ajax(path, function(html) {
+                $.ajax(path).then(function(html) {
                     var template = $("<script>");
                     template.attr("id", templateId);
                     template.attr("type", "script/html");
@@ -90,6 +76,9 @@ komvc.ApplicationViewModelHolder = (function (ko) {
     var ApplicationViewModelHolder = function () { };
     ApplicationViewModelHolder.prototype.View = ko.observable(null);
     ApplicationViewModelHolder.prototype.Model = ko.observable(null);
+    ApplicationViewModelHolder.prototype.IsViewSet =  function(){
+       return  typeof this.View() !== "undefined";
+    };
     return function getInstance() {
         instance = instance || new ApplicationViewModelHolder();
         return instance;
@@ -121,7 +110,7 @@ komvc.Controller = (function () {
     };
     Controller.prototype.Name ="";
     Controller.prototype.addAction = function(name, action){
-        this[name] = action;
+        this[name.toLowerCase()] = action;
     };
     return Controller;
 })();
@@ -150,7 +139,7 @@ komvc.ControllerFactory = (function () {
             };
         }
         var controller = new komvc.Controller();
-        controller.Name = name;
+        controller.Name = name.toLowerCase();
         komvc.utils.forEach(actions, function(key, prop){
             controller.addAction(key, prop);
         });
@@ -175,20 +164,19 @@ komvc.RouteChangeHandler = (function (Sammy) {
         this.RouteHandler = routeHandler;
         defaultRoutes = [
             ['get','#/:controller/:action', function (context) {
-                that.HandleActionResult(that.RouteHandler.RunAction(context.params.controller, context.params.action, context.params));
+                that.HandleActionResult(that.RouteHandler.RunAction(context.params.controller, context.params.action, context.params, context));
             }],
             ['get','#/:controller', function (context) {
-                that.HandleActionResult(that.RouteHandler.RunAction(context.params.controller, "index", context.params));
+                that.HandleActionResult(that.RouteHandler.RunAction(context.params.controller, "index", context.params, context));
             }],
             ['get','#/', function (context) {
-                that.HandleActionResult(that.RouteHandler.RunAction("home", "index", context.params));
+                that.HandleActionResult(that.RouteHandler.RunAction("home", "index", context.params, context));
             }]
         ];
     };
     RouteChangeHandler.prototype._SammyApp = null;
     RouteChangeHandler.prototype.RouteHandler = null;
     RouteChangeHandler.prototype.HandleActionResult = function(result){
-        debugger;
         if (typeof result !== "undefined") {
             if (result.NotFound) {
                 context.notFound();//WHAT IS CONTEXT
@@ -209,10 +197,20 @@ komvc.RouteChangeHandler = (function (Sammy) {
             $.merge(routes, additionalRoutes);
         }
 
-        var app = Sammy("#main", function () {
+        var app = Sammy(function () {
             this.mapRoutes(routes);
+            this.bind('run', function(e) {
+                var ctx = this;
+                $('body').on('click', 'a', function(e) {
+                    var href = $(e.target).attr('href');
+                    if (href.indexOf("#") === 0) {
+                        e.preventDefault();
+                        ctx.redirect($(e.target).attr('href'));
+                        return false;
+                    }
+                });
+            });
         });
-
         app.run("#/");
         this._SammyApp = app;
         return this._SammyApp;
@@ -281,6 +279,12 @@ komvc.Run = (function($){
           }
       }
     },
+    handleAnchorClick = function(){
+        $("body").on("a[href^='#']", "click", function(){
+           var app = routeChangeHandler.GetSammyApp();
+            debugger;
+        });
+    },
     init = function(config){
         controllerFactory = new komvc.ControllerFactory();
         processPreloadedControllers();
@@ -288,7 +292,8 @@ komvc.Run = (function($){
         routeChangeHandler = new komvc.RouteChangeHandler(routeHandler);
         routeChangeHandler.StartRouteChangeHandler(komvc.config.CustomRoutes);
         $(function () {
-            komvc.config.AppContainer.attr("data-bind","template: { name: View, data: Model }");
+            handleAnchorClick();
+            komvc.config.AppContainer.append("<!-- ko if: View() !== null --><!-- ko template: { name: View, data: Model } --><!-- /ko --><!-- /ko -->");
             ko.applyBindings(komvc.ApplicationViewModelHolder(), komvc.config.AppContainer[0]);
         })
     };
@@ -305,7 +310,7 @@ komvc.RouteHandler = (function(){
         if (typeof this.ActiveController === "undefined") {
         }
     };
-    RouteHandler.prototype.RunAction = function(controllerName, actionName, params){
+    RouteHandler.prototype.RunAction = function(controllerName, actionName, params, sammyContext){
         try{
             var controller = this.ControllerFactory.GetController(controllerName + "controller");
             if (typeof controller === "undefined") {
@@ -320,7 +325,7 @@ komvc.RouteHandler = (function(){
                 };
             }
 
-            return controller[actionName](params);
+            return controller[actionName](params, sammyContext);
         }catch (e){
             return {
                 Error: e
@@ -366,5 +371,27 @@ komvc.ActionResult = (function (ApplicationViewModelHolder, $) {
     };
     return ActionResult;
 })(komvc.ApplicationViewModelHolder, komvc.$);
+var preLoadedControllers = {};
+Controller = function(controllerName, controllerCallback){
+    var action = function(actionName, actionCallback){
+        if(typeof preLoadedControllers[controllerName] === "undefined"){
+            preLoadedControllers[controllerName] = {};
+            preLoadedControllers[controllerName][actionName] = actionCallback;
+        } else {
+            var currentController = preLoadedControllers[controllerName];
+            if(typeof currentController[actionName] === "undefined"){
+                currentController[actionName] = actionCallback;
+            }
+        }
+    };
+    controllerCallback(action);
+};
+ko.components.register("komvccontainer", {
+    template: "<!-- ko if: View() !== null --><!-- ko template: { name: View, data: Model } --><!-- /ko --><!-- /ko -->",
+    viewModel: function(params) {
+        this.View = komvc.ApplicationViewModelHolder().View;
+        this.Model = komvc.ApplicationViewModelHolder().Model;
+    }
+});
     return komvc;
 }));
