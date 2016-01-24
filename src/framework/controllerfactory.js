@@ -23,7 +23,7 @@
             };
         }
         var controller = new komvc.Controller();
-        controller.Name = name;
+        controller.Name = name.toLowerCase();
         komvc.utils.forEach(actions, function(key, prop){
             controller.addAction(key, prop);
         });

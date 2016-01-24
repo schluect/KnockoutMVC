@@ -9,5 +9,7 @@
   "src/framework/run.js",
   "src/framework/routehandler/routehandler.js",
   "src/framework/actionresults/actionresult.js",
+  "src/framework/builders/controllerbuilder.js",
+  "src/framework/components/mvcviewcontainer.js",
   "tools/wrap.end"
 ]

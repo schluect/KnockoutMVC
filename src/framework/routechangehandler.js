@@ -5,26 +5,25 @@
         this.RouteHandler = routeHandler;
         defaultRoutes = [
             ['get','#/:controller/:action', function (context) {
-                that.HandleActionResult(that.RouteHandler.RunAction(context.params.controller, context.params.action, context.params));
+                that.HandleActionResult(that.RouteHandler.RunAction(context.params.controller, context.params.action, context.params, context));
             }],
             ['get','#/:controller', function (context) {
-                that.HandleActionResult(that.RouteHandler.RunAction(context.params.controller, "index", context.params));
+                that.HandleActionResult(that.RouteHandler.RunAction(context.params.controller, "index", context.params, context));
             }],
             ['get','#/', function (context) {
-                that.HandleActionResult(that.RouteHandler.RunAction("home", "index", context.params));
+                that.HandleActionResult(that.RouteHandler.RunAction("home", "index", context.params, context));
             }]
         ];
     };
     RouteChangeHandler.prototype._SammyApp = null;
     RouteChangeHandler.prototype.RouteHandler = null;
     RouteChangeHandler.prototype.HandleActionResult = function(result){
-        debugger;
         if (typeof result !== "undefined") {
             if (result.NotFound) {
-                context.notFound();//WHAT IS CONTEXT
+                this._SammyApp.notFound();//WHAT IS CONTEXT
             }
             if (result.Error) {
-                context.error(result.Error);//WHAT IS CONTEXT
+                this._SammyApp.error(result.Error);//WHAT IS CONTEXT
             }
         }
     };
@@ -39,10 +38,20 @@
             $.merge(routes, additionalRoutes);
         }
 
-        var app = Sammy("#main", function () {
+        var app = Sammy(komvc.config.AppSelector, function () {
             this.mapRoutes(routes);
+            this.bind('run', function(e) {
+                var ctx = this;
+                $('body').on('click', 'a', function(e) {
+                    var href = $(e.target).attr('href');
+                    if (href.indexOf("#") === 0) {
+                        e.preventDefault();
+                        ctx.redirect($(e.target).attr('href'));
+                        return false;
+                    }
+                });
+            });
         });
-
         app.run("#/");
         this._SammyApp = app;
         return this._SammyApp;
@@ -69,8 +78,7 @@
         return false;
     };
     RouteChangeHandler.prototype.ValidateCustomRouteWithoutVerb = function(route, callback){
-        return typeof route === "string" && typeof callback === "function"
-            && komvc.config.DefaultRoutes.indexOf(route) == -1;
+        return typeof route === "string" && typeof callback === "function" && komvc.config.DefaultRoutes.indexOf(route) == -1;
     };
     return RouteChangeHandler;
 })(komvc.Sammy);
