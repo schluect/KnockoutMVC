@@ -179,10 +179,10 @@ komvc.RouteChangeHandler = (function (Sammy) {
     RouteChangeHandler.prototype.HandleActionResult = function(result){
         if (typeof result !== "undefined") {
             if (result.NotFound) {
-                context.notFound();//WHAT IS CONTEXT
+                this._SammyApp.notFound();//WHAT IS CONTEXT
             }
             if (result.Error) {
-                context.error(result.Error);//WHAT IS CONTEXT
+                this._SammyApp.error(result.Error);//WHAT IS CONTEXT
             }
         }
     };
@@ -197,7 +197,7 @@ komvc.RouteChangeHandler = (function (Sammy) {
             $.merge(routes, additionalRoutes);
         }
 
-        var app = Sammy(function () {
+        var app = Sammy(komvc.config.AppSelector, function () {
             this.mapRoutes(routes);
             this.bind('run', function(e) {
                 var ctx = this;
@@ -243,7 +243,7 @@ komvc.RouteChangeHandler = (function (Sammy) {
     return RouteChangeHandler;
 })(komvc.Sammy);
 komvc.Run = (function($){
-    var defaultAppSelector = '[data-komvc=true]';
+    var defaultAppSelector = '#komvccontainer';
     var run = function(config){
         $.extend(komvc.config, config);
         komvc.config.AppContainer =  $(komvc.config.AppSelector);
@@ -279,12 +279,6 @@ komvc.Run = (function($){
           }
       }
     },
-    handleAnchorClick = function(){
-        $("body").on("a[href^='#']", "click", function(){
-           var app = routeChangeHandler.GetSammyApp();
-            debugger;
-        });
-    },
     init = function(config){
         controllerFactory = new komvc.ControllerFactory();
         processPreloadedControllers();
@@ -292,7 +286,6 @@ komvc.Run = (function($){
         routeChangeHandler = new komvc.RouteChangeHandler(routeHandler);
         routeChangeHandler.StartRouteChangeHandler(komvc.config.CustomRoutes);
         $(function () {
-            handleAnchorClick();
             komvc.config.AppContainer.append("<!-- ko if: View() !== null --><!-- ko template: { name: View, data: Model } --><!-- /ko --><!-- /ko -->");
             ko.applyBindings(komvc.ApplicationViewModelHolder(), komvc.config.AppContainer[0]);
         })
@@ -365,8 +358,8 @@ komvc.ActionResult = (function (ApplicationViewModelHolder, $) {
     ActionResult.prototype.Process = function(){
         var that = this;
         komvc.utils.loadTemplate(this.View, this.ViewPath,function(){
-            ApplicationViewModelHolder().View(that.View);
             ApplicationViewModelHolder().Model(that.Model);
+            ApplicationViewModelHolder().View(that.View);
         });
     };
     return ActionResult;

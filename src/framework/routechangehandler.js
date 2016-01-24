@@ -20,10 +20,10 @@
     RouteChangeHandler.prototype.HandleActionResult = function(result){
         if (typeof result !== "undefined") {
             if (result.NotFound) {
-                context.notFound();//WHAT IS CONTEXT
+                this._SammyApp.notFound();//WHAT IS CONTEXT
             }
             if (result.Error) {
-                context.error(result.Error);//WHAT IS CONTEXT
+                this._SammyApp.error(result.Error);//WHAT IS CONTEXT
             }
         }
     };
@@ -38,7 +38,7 @@
             $.merge(routes, additionalRoutes);
         }
 
-        var app = Sammy(function () {
+        var app = Sammy(komvc.config.AppSelector, function () {
             this.mapRoutes(routes);
             this.bind('run', function(e) {
                 var ctx = this;
