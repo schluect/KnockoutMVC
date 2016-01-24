@@ -23,7 +23,7 @@
         },
         loadTemplate: function (templateId, path, callback) {
             if ($("#" + templateId).length === 0) {
-                $.ajax(path, function(html) {
+                $.ajax(path).then(function(html) {
                     var template = $("<script>");
                     template.attr("id", templateId);
                     template.attr("type", "script/html");

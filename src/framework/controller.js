@@ -24,7 +24,7 @@
     };
     Controller.prototype.Name ="";
     Controller.prototype.addAction = function(name, action){
-        this[name] = action;
+        this[name.toLowerCase()] = action;
     };
     return Controller;
 })();

@@ -11,3 +11,6 @@ komvc.config = {
     "SammyVerbs":["get", "post", "put", "delete"],
     "DefaultRoutes":["#/","#/:controller","#/:controller/:action"]
 };
+var controllerFactory,
+    routeHandler,
+    routeChangeHandler;

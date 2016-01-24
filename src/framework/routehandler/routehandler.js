@@ -8,7 +8,7 @@
         if (typeof this.ActiveController === "undefined") {
         }
     };
-    RouteHandler.prototype.RunAction = function(controllerName, actionName, params){
+    RouteHandler.prototype.RunAction = function(controllerName, actionName, params, sammyContext){
         try{
             var controller = this.ControllerFactory.GetController(controllerName + "controller");
             if (typeof controller === "undefined") {
@@ -23,7 +23,7 @@
                 };
             }
 
-            return controller[actionName](params);
+            return controller[actionName](params, sammyContext);
         }catch (e){
             return {
                 Error: e

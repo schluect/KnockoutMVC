@@ -1,13 +1,17 @@
-﻿var HomeController = function () {
-    return {
-        name : "home",
-        actions: {
-            index: function index() {
-                var model = {
-                    title: "HOME PAGE"
-                };
-                return this.Get("index", model);
-            }
-        }
-    };
-}
+﻿Controller("Home", function(Action){
+    Action("Index", function index(params, context) {
+        var model = {
+            title: "HOME PAGE"
+        };
+
+        context.app.setLocation('#/home/hometest');
+
+        //return this.Get("index", model);
+    });
+    Action("HomeTest", function index() {
+        var model = {
+            title: "HomeTest PAGE"
+        };
+        return this.Get("hometest", model);
+    });
+});
