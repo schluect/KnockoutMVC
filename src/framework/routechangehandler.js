@@ -78,8 +78,7 @@
         return false;
     };
     RouteChangeHandler.prototype.ValidateCustomRouteWithoutVerb = function(route, callback){
-        return typeof route === "string" && typeof callback === "function"
-            && komvc.config.DefaultRoutes.indexOf(route) == -1;
+        return typeof route === "string" && typeof callback === "function" && komvc.config.DefaultRoutes.indexOf(route) == -1;
     };
     return RouteChangeHandler;
 })(komvc.Sammy);

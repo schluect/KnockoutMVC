@@ -237,8 +237,7 @@ komvc.RouteChangeHandler = (function (Sammy) {
         return false;
     };
     RouteChangeHandler.prototype.ValidateCustomRouteWithoutVerb = function(route, callback){
-        return typeof route === "string" && typeof callback === "function"
-            && komvc.config.DefaultRoutes.indexOf(route) == -1;
+        return typeof route === "string" && typeof callback === "function" && komvc.config.DefaultRoutes.indexOf(route) == -1;
     };
     return RouteChangeHandler;
 })(komvc.Sammy);
@@ -247,7 +246,7 @@ komvc.Run = (function($){
     var run = function(config){
         $.extend(komvc.config, config);
         komvc.config.AppContainer =  $(komvc.config.AppSelector);
-        if (komvc.config.AppContainer.length == 0) {
+        if (komvc.config.AppContainer.length === 0) {
             $('body').attr('data-komvc',true);
             komvc.config.AppSelector = defaultAppSelector;
             komvc.config.AppContainer =  $(komvc.config.AppSelector);
@@ -267,7 +266,7 @@ komvc.Run = (function($){
         if (typeof controllerTypes !== "undefined" && Array.isArray(controllerTypes)){
             require(controllerTypes, function () {
                 config.Controllers = arguments;
-                callback(config)
+                callback(config);
             });
         }
     },
@@ -288,7 +287,7 @@ komvc.Run = (function($){
         $(function () {
             komvc.config.AppContainer.append("<!-- ko if: View() !== null --><!-- ko template: { name: View, data: Model } --><!-- /ko --><!-- /ko -->");
             ko.applyBindings(komvc.ApplicationViewModelHolder(), komvc.config.AppContainer[0]);
-        })
+        });
     };
     komvc.config.AppSelector = defaultAppSelector;
     return run;
