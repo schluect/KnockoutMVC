@@ -1,2 +1,8 @@
 <h1 data-bind="text: title"></h1>
-<span data-bind="text: date"></span>
+<form method="post" action="#/test/test2">
+    <input data-bind="value : date" type="date" name="Date">
+    <input type="submit" name="Save Date"/>
+    <!-- ko if: WasPosted -->
+    Your posted date was: <span data-bind="text: PostedDate "></span>
+    <!-- /ko -->
+</form>

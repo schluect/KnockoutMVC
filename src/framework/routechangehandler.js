@@ -12,6 +12,15 @@
             }],
             ['get','#/', function (context) {
                 that.HandleActionResult(that.RouteHandler.RunAction("home", "index", context.params, context));
+            }],
+            ['post','#/:controller/:action', function (context) {
+                that.HandleActionResult(that.RouteHandler.RunAction(context.params.controller, context.params.action, context.params, context));
+            }],
+            ['post','#/:controller', function (context) {
+                that.HandleActionResult(that.RouteHandler.RunAction(context.params.controller, "index", context.params, context));
+            }],
+            ['post','#/', function (context) {
+                that.HandleActionResult(that.RouteHandler.RunAction("home", "index", context.params, context));
             }]
         ];
     };
