@@ -30,8 +30,11 @@ komvc.Run = (function($){
     processPreloadedControllers = function(){
       if (typeof preLoadedControllers === "object"){
           for(var key in preLoadedControllers){
-              var actions = preLoadedControllers[key];
-              controllerFactory.CreateController(key, actions);
+              var methodTypes = preLoadedControllers[key];
+              for(var methodType in methodTypes) {
+                  var actions = methodTypes[methodType];
+                  controllerFactory.CreateController(key, actions, methodType);
+              }
           }
       }
     },
@@ -42,7 +45,7 @@ komvc.Run = (function($){
         routeChangeHandler = new komvc.RouteChangeHandler(routeHandler);
         routeChangeHandler.StartRouteChangeHandler(komvc.config.CustomRoutes);
         $(function () {
-            komvc.config.AppContainer.append("<!-- ko if: View() !== null --><!-- ko template: { name: View, data: Model } --><!-- /ko --><!-- /ko -->");
+            komvc.config.AppContainer.append("<!-- ko with: ApplicationState --><!-- ko if: View !== null --><!-- ko template: { name: View, data: Model } --><!-- /ko --><!-- /ko --><!-- /ko -->");
             ko.applyBindings(komvc.ApplicationViewModelHolder(), komvc.config.AppContainer[0]);
         });
     };

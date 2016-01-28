@@ -4,13 +4,13 @@
     };
     RouteHandler.prototype.ControllerFactory = null;
     RouteHandler.prototype.ActivateController = function (controllerName) {
-        this.ActiveController = this.ControllerFactory.GetController(controllerName + "controller");
+        this.ActiveController = this.ControllerFactory.GetController(controllerName);
         if (typeof this.ActiveController === "undefined") {
         }
     };
     RouteHandler.prototype.RunAction = function(controllerName, actionName, params, sammyContext){
         try{
-            var controller = this.ControllerFactory.GetController(controllerName + "controller");
+            var controller = this.ControllerFactory.GetController(controllerName, sammyContext.verb);
             if (typeof controller === "undefined") {
                 return {
                     NotFound: true

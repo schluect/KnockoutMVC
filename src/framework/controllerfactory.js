@@ -10,7 +10,7 @@
 
         this.Controllers[type] = controller;
     };
-    ControllerFactory.prototype.CreateController = function (name, actions) {
+    ControllerFactory.prototype.CreateController = function (name, actions, methodType) {
         if (typeof name === "undefined") {
             throw "name is required";
         }
@@ -28,16 +28,19 @@
             controller.addAction(key, prop);
         });
 
-        var type = (name+"controller").toLowerCase();
+        var type = this.CreateControllerTypeKey(name, methodType);
         this.Controllers[type] = controller;
     };
-    ControllerFactory.prototype.GetController = function (type) {
-        type = type.toLowerCase();
+    ControllerFactory.prototype.GetController = function (name, methodType) {
+        var type = this.CreateControllerTypeKey(name, methodType);
         if (typeof this.Controllers[type] !== "undefined") {
             return this.Controllers[type];
         }
 
         return null;
+    };
+    ControllerFactory.prototype.CreateControllerTypeKey = function (controllerName, methodType) {
+        return (controllerName+"controller_"+methodType).toLowerCase();
     };
     return ControllerFactory;
 })();

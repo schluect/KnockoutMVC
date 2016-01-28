@@ -28,25 +28,16 @@ gulp.task('jshint', function(){
 		.pipe(jshint())
 		.pipe(jshint.reporter('jshint-stylish'));
 });
-
-
-gulp.task('build-komvccomponent', function(){
-	var fileContent = fs.readFileSync("src/framework/views/component/komvccontainer.html");
-	gulp.src(['src/framework/components/mvcviewcontainer.template.js'])
-		.pipe(replace("{{view}}", fileContent))
-		.pipe(concat('mvcviewcontainer.js'))
-		.pipe(gulp.dest('src/framework/components'));
-});
 gulp.task('copy-libs', function () {
     return gulp.src(libs)
       .pipe(gulp.dest('src/lib'))
 });
-gulp.task('build.dev',['build-komvccomponent','copy-libs'], function(){
+gulp.task('build.dev',['copy-libs'], function(){
 	return gulp.src(buildSources)
 		.pipe(concat('knockout-mvc.js'))
 		.pipe(gulp.dest('./dist/'))
 });
-gulp.task('build.prod',['build-komvccomponent','copy-libs'], function(){
+gulp.task('build.prod',['copy-libs'], function(){
 	return gulp.src(buildSources)
 		.pipe(concat('knockout-mvc.min.js'))
 		.pipe(uglify())
