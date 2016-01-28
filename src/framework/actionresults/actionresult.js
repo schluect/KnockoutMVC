@@ -29,8 +29,7 @@
     ActionResult.prototype.Process = function(){
         var that = this;
         komvc.utils.loadTemplate(this.View, this.ViewPath,function(){
-            ApplicationViewModelHolder().Model(that.Model);
-            ApplicationViewModelHolder().View(that.View);
+            ApplicationViewModelHolder().UpdateApplicationState(that.View, that.Model);
         });
     };
     return ActionResult;

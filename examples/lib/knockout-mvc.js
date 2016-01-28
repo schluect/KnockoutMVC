@@ -74,10 +74,15 @@ komvc.utils = (function ($) {
 komvc.ApplicationViewModelHolder = (function (ko) {
     var instance = null;
     var ApplicationViewModelHolder = function () { };
-    ApplicationViewModelHolder.prototype.View = ko.observable(null);
-    ApplicationViewModelHolder.prototype.Model = ko.observable(null);
-    ApplicationViewModelHolder.prototype.IsViewSet =  function(){
-       return  typeof this.View() !== "undefined";
+    ApplicationViewModelHolder.prototype.ApplicationState = ko.observable({
+        View: null,
+        Model: null
+    });
+    ApplicationViewModelHolder.prototype.UpdateApplicationState = function(view, model){
+        this.ApplicationState({
+            View: view,
+            Model: model
+        });
     };
     return function getInstance() {
         instance = instance || new ApplicationViewModelHolder();
@@ -126,7 +131,7 @@ komvc.ControllerFactory = (function () {
 
         this.Controllers[type] = controller;
     };
-    ControllerFactory.prototype.CreateController = function (name, actions) {
+    ControllerFactory.prototype.CreateController = function (name, actions, methodType) {
         if (typeof name === "undefined") {
             throw "name is required";
         }
@@ -144,16 +149,19 @@ komvc.ControllerFactory = (function () {
             controller.addAction(key, prop);
         });
 
-        var type = (name+"controller").toLowerCase();
+        var type = this.CreateControllerTypeKey(name, methodType);
         this.Controllers[type] = controller;
     };
-    ControllerFactory.prototype.GetController = function (type) {
-        type = type.toLowerCase();
+    ControllerFactory.prototype.GetController = function (name, methodType) {
+        var type = this.CreateControllerTypeKey(name, methodType);
         if (typeof this.Controllers[type] !== "undefined") {
             return this.Controllers[type];
         }
 
         return null;
+    };
+    ControllerFactory.prototype.CreateControllerTypeKey = function (controllerName, methodType) {
+        return (controllerName+"controller_"+methodType).toLowerCase();
     };
     return ControllerFactory;
 })();
@@ -170,6 +178,15 @@ komvc.RouteChangeHandler = (function (Sammy) {
                 that.HandleActionResult(that.RouteHandler.RunAction(context.params.controller, "index", context.params, context));
             }],
             ['get','#/', function (context) {
+                that.HandleActionResult(that.RouteHandler.RunAction("home", "index", context.params, context));
+            }],
+            ['post','#/:controller/:action', function (context) {
+                that.HandleActionResult(that.RouteHandler.RunAction(context.params.controller, context.params.action, context.params, context));
+            }],
+            ['post','#/:controller', function (context) {
+                that.HandleActionResult(that.RouteHandler.RunAction(context.params.controller, "index", context.params, context));
+            }],
+            ['post','#/', function (context) {
                 that.HandleActionResult(that.RouteHandler.RunAction("home", "index", context.params, context));
             }]
         ];
@@ -237,8 +254,7 @@ komvc.RouteChangeHandler = (function (Sammy) {
         return false;
     };
     RouteChangeHandler.prototype.ValidateCustomRouteWithoutVerb = function(route, callback){
-        return typeof route === "string" && typeof callback === "function"
-            && komvc.config.DefaultRoutes.indexOf(route) == -1;
+        return typeof route === "string" && typeof callback === "function" && komvc.config.DefaultRoutes.indexOf(route) == -1;
     };
     return RouteChangeHandler;
 })(komvc.Sammy);
@@ -247,7 +263,7 @@ komvc.Run = (function($){
     var run = function(config){
         $.extend(komvc.config, config);
         komvc.config.AppContainer =  $(komvc.config.AppSelector);
-        if (komvc.config.AppContainer.length == 0) {
+        if (komvc.config.AppContainer.length === 0) {
             $('body').attr('data-komvc',true);
             komvc.config.AppSelector = defaultAppSelector;
             komvc.config.AppContainer =  $(komvc.config.AppSelector);
@@ -267,15 +283,18 @@ komvc.Run = (function($){
         if (typeof controllerTypes !== "undefined" && Array.isArray(controllerTypes)){
             require(controllerTypes, function () {
                 config.Controllers = arguments;
-                callback(config)
+                callback(config);
             });
         }
     },
     processPreloadedControllers = function(){
       if (typeof preLoadedControllers === "object"){
           for(var key in preLoadedControllers){
-              var actions = preLoadedControllers[key];
-              controllerFactory.CreateController(key, actions);
+              var methodTypes = preLoadedControllers[key];
+              for(var methodType in methodTypes) {
+                  var actions = methodTypes[methodType];
+                  controllerFactory.CreateController(key, actions, methodType);
+              }
           }
       }
     },
@@ -286,9 +305,9 @@ komvc.Run = (function($){
         routeChangeHandler = new komvc.RouteChangeHandler(routeHandler);
         routeChangeHandler.StartRouteChangeHandler(komvc.config.CustomRoutes);
         $(function () {
-            komvc.config.AppContainer.append("<!-- ko if: View() !== null --><!-- ko template: { name: View, data: Model } --><!-- /ko --><!-- /ko -->");
+            komvc.config.AppContainer.append("<!-- ko with: ApplicationState --><!-- ko if: View !== null --><!-- ko template: { name: View, data: Model } --><!-- /ko --><!-- /ko --><!-- /ko -->");
             ko.applyBindings(komvc.ApplicationViewModelHolder(), komvc.config.AppContainer[0]);
-        })
+        });
     };
     komvc.config.AppSelector = defaultAppSelector;
     return run;
@@ -299,13 +318,13 @@ komvc.RouteHandler = (function(){
     };
     RouteHandler.prototype.ControllerFactory = null;
     RouteHandler.prototype.ActivateController = function (controllerName) {
-        this.ActiveController = this.ControllerFactory.GetController(controllerName + "controller");
+        this.ActiveController = this.ControllerFactory.GetController(controllerName);
         if (typeof this.ActiveController === "undefined") {
         }
     };
     RouteHandler.prototype.RunAction = function(controllerName, actionName, params, sammyContext){
         try{
-            var controller = this.ControllerFactory.GetController(controllerName + "controller");
+            var controller = this.ControllerFactory.GetController(controllerName, sammyContext.verb);
             if (typeof controller === "undefined") {
                 return {
                     NotFound: true
@@ -358,33 +377,33 @@ komvc.ActionResult = (function (ApplicationViewModelHolder, $) {
     ActionResult.prototype.Process = function(){
         var that = this;
         komvc.utils.loadTemplate(this.View, this.ViewPath,function(){
-            ApplicationViewModelHolder().Model(that.Model);
-            ApplicationViewModelHolder().View(that.View);
+            ApplicationViewModelHolder().UpdateApplicationState(that.View, that.Model);
         });
     };
     return ActionResult;
 })(komvc.ApplicationViewModelHolder, komvc.$);
 var preLoadedControllers = {};
 Controller = function(controllerName, controllerCallback){
-    var action = function(actionName, actionCallback){
+    var action = function(actionName, methodType, actionCallback){
+        if (typeof methodType === "function"){
+            actionCallback = methodType;
+            methodType = "get";
+        }
         if(typeof preLoadedControllers[controllerName] === "undefined"){
             preLoadedControllers[controllerName] = {};
-            preLoadedControllers[controllerName][actionName] = actionCallback;
+            preLoadedControllers[controllerName][methodType] = {};
+            preLoadedControllers[controllerName][methodType][actionName] = actionCallback;
         } else {
             var currentController = preLoadedControllers[controllerName];
-            if(typeof currentController[actionName] === "undefined"){
-                currentController[actionName] = actionCallback;
+            if(typeof currentController[methodType] === "undefined") {
+                currentController[methodType] = {};
+            }
+            if(typeof currentController[methodType][actionName] === "undefined"){
+                currentController[methodType][actionName] = actionCallback;
             }
         }
     };
     controllerCallback(action);
 };
-ko.components.register("komvccontainer", {
-    template: "<!-- ko if: View() !== null --><!-- ko template: { name: View, data: Model } --><!-- /ko --><!-- /ko -->",
-    viewModel: function(params) {
-        this.View = komvc.ApplicationViewModelHolder().View;
-        this.Model = komvc.ApplicationViewModelHolder().Model;
-    }
-});
     return komvc;
 }));

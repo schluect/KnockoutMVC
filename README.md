@@ -1,3 +1,8 @@
 # KnockoutMVC
-Branch feature-version_0.0.2
-<img src="https://travis-ci.org/schluect/KnockoutMVC.svg?branch=feature-version_0.0.2"/>
+<img src="https://travis-ci.org/schluect/KnockoutMVC.svg?branch=master"/>
+
+Four steps
+1. Add depencies
+2. Add container div with id
+3. Create controllers with actions
+4. Call komvc.run();
