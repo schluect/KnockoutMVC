@@ -2,6 +2,7 @@
   "tools/wrap.start",
   "src/framework/namespace.js",
   "src/framework/utils.js",
+  "src/framework/resourceInitializer.js",
   "src/framework/applicationviewmodelholder.js",
   "src/framework/controller.js",
   "src/framework/controllerfactory.js",

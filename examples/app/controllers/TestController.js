@@ -1,4 +1,4 @@
-﻿Controller("Test", function(Action){
+﻿Controller("Test",["DateService"], function(DateService){
     Action("Index", function index() {
         var model = {
             title: "Test PAGE"
@@ -8,7 +8,7 @@
     Action("Test2", function index() {
         var model = {
             title: "Test2 PAGE",
-            date:  ko.observable("2013-01-28"),
+            date:  ko.observable(DateService.GetTestDate()),
             WasPosted: false
         };
         return this.Get("test", model);
@@ -16,7 +16,7 @@
     Action("Test2", "post", function index(params) {
         var model = {
             title: "Test2 PAGE",
-            date:  ko.observable("2013-01-28"),
+            date:  ko.observable(DateService.GetTestDate()),
             WasPosted: true,
             PostedDate: params.Date
         };
