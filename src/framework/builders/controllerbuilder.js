@@ -1,6 +1,14 @@
 var preLoadedControllers = {};
-Controller = function(controllerName, controllerCallback){
-    var action = function(actionName, methodType, actionCallback){
+Controller = function(controllerName, requestedResources, controllerCallback){
+    var resources = [],
+        self = this;
+    if (typeof requestedResources  === "function"){
+        controllerCallback = requestedResources;
+        requestedResources = null;
+    } else {
+        resources = komvc.InitializeResources(requestedResources);
+    }
+    self.Action = function(actionName, methodType, actionCallback){
         if (typeof methodType === "function"){
             actionCallback = methodType;
             methodType = "get";
@@ -19,5 +27,5 @@ Controller = function(controllerName, controllerCallback){
             }
         }
     };
-    controllerCallback(action);
+    controllerCallback.apply(self, resources);
 };

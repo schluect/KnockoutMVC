@@ -1,4 +1,4 @@
-﻿Controller("Home", function(Action){
+﻿Controller("Home", function(){
     Action("Index", function index(params, context) {
         var model = {
             title: "HOME PAGE"
