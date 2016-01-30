@@ -10,15 +10,14 @@
     <script src="lib/knockout.js"></script>
     <script src="lib/sammy-latest.min.js"></script>
     <script src="lib/knockout-mvc.js"></script>
+    <script src="app/services/dateservice.js"></script>
     <script src="app/controllers/homecontroller.js"></script>
     <script src="app/controllers/testcontroller.js"></script>
     <script>
         $(function(){
             var config = {
-                ViewsLocation: "/knockoutmvc/examples/app",
-
+                ViewsLocation: "/knockoutmvc/examples/app"
             };
-
             komvc.Run(config);
         })
     </script>

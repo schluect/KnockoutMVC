@@ -18,7 +18,8 @@ komvc.config = {
     "UseRequire": false,
     "CustomRoutes": null,
     "SammyVerbs":["get", "post", "put", "delete"],
-    "DefaultRoutes":["#/","#/:controller","#/:controller/:action"]
+    "DefaultRoutes":["#/","#/:controller","#/:controller/:action"],
+    "Resources": {}
 };
 var controllerFactory,
     routeHandler,
@@ -71,6 +72,21 @@ komvc.utils = (function ($) {
         }
     };
 })(komvc.$);
+komvc.InitializeResources = function(requestedResources){
+    var resources = [];
+    $.each(requestedResources, function(index, resourceKey){
+        if (typeof komvc.config.Resources[resourceKey] === "undefined"){
+            throw "Resource: " + resourceKey + " is missing.";
+        }
+        resources.push(new komvc.config.Resources[resourceKey]());
+    });
+
+    return resources;
+};
+komvc.RegisterService = function(serviceKey, service) {
+    komvc.config.Resources[serviceKey] = service;
+};
+
 komvc.ApplicationViewModelHolder = (function (ko) {
     var instance = null;
     var ApplicationViewModelHolder = function () { };
@@ -383,8 +399,16 @@ komvc.ActionResult = (function (ApplicationViewModelHolder, $) {
     return ActionResult;
 })(komvc.ApplicationViewModelHolder, komvc.$);
 var preLoadedControllers = {};
-Controller = function(controllerName, controllerCallback){
-    var action = function(actionName, methodType, actionCallback){
+Controller = function(controllerName, requestedResources, controllerCallback){
+    var resources = [],
+        self = this;
+    if (typeof requestedResources  === "function"){
+        controllerCallback = requestedResources;
+        requestedResources = null;
+    } else {
+        resources = komvc.InitializeResources(requestedResources);
+    }
+    self.Action = function(actionName, methodType, actionCallback){
         if (typeof methodType === "function"){
             actionCallback = methodType;
             methodType = "get";
@@ -403,7 +427,7 @@ Controller = function(controllerName, controllerCallback){
             }
         }
     };
-    controllerCallback(action);
+    controllerCallback.apply(self, resources);
 };
     return komvc;
 }));

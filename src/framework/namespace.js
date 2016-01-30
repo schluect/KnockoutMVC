@@ -9,7 +9,8 @@ komvc.config = {
     "UseRequire": false,
     "CustomRoutes": null,
     "SammyVerbs":["get", "post", "put", "delete"],
-    "DefaultRoutes":["#/","#/:controller","#/:controller/:action"]
+    "DefaultRoutes":["#/","#/:controller","#/:controller/:action"],
+    "Resources": {}
 };
 var controllerFactory,
     routeHandler,
