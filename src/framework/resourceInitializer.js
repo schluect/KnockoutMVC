@@ -4,7 +4,12 @@ komvc.InitializeResources = function(requestedResources){
         if (typeof komvc.config.Resources[resourceKey] === "undefined"){
             throw "Resource: " + resourceKey + " is missing.";
         }
-        resources.push(new komvc.config.Resources[resourceKey]());
+        var resource = komvc.config.Resources[resourceKey];
+        if (typeof resource === "function") {
+            resources.push(new komvc.config.Resources[resourceKey]());
+        } else {
+            resources.push(resource);
+        }
     });
 
     return resources;
