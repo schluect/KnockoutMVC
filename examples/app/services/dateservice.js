@@ -6,4 +6,3 @@ examples.DateService = function(){
       }
   };
 };
-komvc.RegisterService("DateService",examples.DateService);
