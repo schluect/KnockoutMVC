@@ -6,6 +6,10 @@
         Model: null
     });
     ApplicationViewModelHolder.prototype.UpdateApplicationState = function(view, model){
+        if (typeof model.afterRender !== "function"){
+            model.afterRender = function(){};
+        }
+
         this.ApplicationState({
             View: view,
             Model: model

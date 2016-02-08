@@ -100,6 +100,10 @@ komvc.ApplicationViewModelHolder = (function (ko) {
         Model: null
     });
     ApplicationViewModelHolder.prototype.UpdateApplicationState = function(view, model){
+        if (typeof model.afterRender !== "function"){
+            model.afterRender = function(){};
+        }
+
         this.ApplicationState({
             View: view,
             Model: model
@@ -326,7 +330,7 @@ komvc.Run = (function($){
         routeChangeHandler = new komvc.RouteChangeHandler(routeHandler);
         routeChangeHandler.StartRouteChangeHandler(komvc.config.CustomRoutes);
         $(function () {
-            komvc.config.AppContainer.append("<!-- ko with: ApplicationState --><!-- ko if: View !== null --><!-- ko template: { name: View, data: Model } --><!-- /ko --><!-- /ko --><!-- /ko -->");
+            komvc.config.AppContainer.append("<!-- ko with: ApplicationState --><!-- ko if: View !== null --><!-- ko template: { name: View, data: Model, afterRender: Model.afterRender } --><!-- /ko --><!-- /ko --><!-- /ko -->");
             ko.applyBindings(komvc.ApplicationViewModelHolder(), komvc.config.AppContainer[0]);
         });
     };
