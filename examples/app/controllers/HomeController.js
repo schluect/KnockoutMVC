@@ -9,9 +9,17 @@
         //return this.Get("index", model);
     });
     Action("HomeTest", function index() {
-        var model = {
-            title: "HomeTest PAGE"
-        };
-        return this.Get("hometest", model);
+        var model = (function(){
+            var self = this;
+            var model = function(){}
+            model.prototype.title = ko.observable("HomeTest PAGE");
+            model.prototype.afterRender = function(elements, model){
+                model.title("HomeTest PAGE - Modified afterRender")
+            };
+
+            return model;
+        })();
+        var newModel = new model();
+        return this.Get("hometest", newModel);
     });
 });
