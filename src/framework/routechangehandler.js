@@ -53,7 +53,7 @@
                 var ctx = this;
                 $('body').on('click', 'a', function(e) {
                     var href = $(e.target).attr('href');
-                    if (href.indexOf("#") === 0) {
+                    if (href&&href.indexOf("#") === 0) {
                         e.preventDefault();
                         ctx.redirect($(e.target).attr('href'));
                         return false;
