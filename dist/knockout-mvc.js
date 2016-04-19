@@ -99,9 +99,35 @@ komvc.ApplicationViewModelHolder = (function (ko) {
         View: null,
         Model: null
     });
+    ApplicationViewModelHolder.prototype.AddGlobalProperty = function(key, value){
+        if (typeof key === "undefined" && typeof value === "undefined"){
+            throw "value must be defined and not null";
+        }else{
+            if(typeof this[key] === "undefined") {
+                this[key] = ko.observable(value);
+            }else{
+                this[key](value);
+            }
+        }
+    };
+    ApplicationViewModelHolder.prototype.AddGlobalFunction = function(key, func){
+        if (typeof key === "undefined" && typeof func !== "function"){
+            throw "func must be a function";
+        }else{
+            this[key] = func;
+        }
+    };
     ApplicationViewModelHolder.prototype.UpdateApplicationState = function(view, model){
         if (typeof model.afterRender !== "function"){
             model.afterRender = function(){};
+        }
+
+        if (typeof model.afterAdd !== "function"){
+            model.afterAdd = function(){};
+        }
+
+        if (typeof model.beforeRemove !== "function"){
+            model.beforeRemove = function(){};
         }
 
         this.ApplicationState({
@@ -245,7 +271,7 @@ komvc.RouteChangeHandler = (function (Sammy) {
                 var ctx = this;
                 $('body').on('click', 'a', function(e) {
                     var href = $(e.target).attr('href');
-                    if (href.indexOf("#") === 0) {
+                    if (href&&href.indexOf("#") === 0) {
                         e.preventDefault();
                         ctx.redirect($(e.target).attr('href'));
                         return false;
@@ -330,7 +356,7 @@ komvc.Run = (function($){
         routeChangeHandler = new komvc.RouteChangeHandler(routeHandler);
         routeChangeHandler.StartRouteChangeHandler(komvc.config.CustomRoutes);
         $(function () {
-            komvc.config.AppContainer.append("<!-- ko with: ApplicationState --><!-- ko if: View !== null --><!-- ko template: { name: View, data: Model, afterRender: Model.afterRender } --><!-- /ko --><!-- /ko --><!-- /ko -->");
+            komvc.config.AppContainer.append("<!-- ko with: ApplicationState --><!-- ko if: View !== null --><!-- ko template: { name: View, data: Model, afterRender: Model.afterRender, afterAdd: Model.afterAdd, beforeRemove: Model.beforeRemove } --><!-- /ko --><!-- /ko --><!-- /ko -->");
             ko.applyBindings(komvc.ApplicationViewModelHolder(), komvc.config.AppContainer[0]);
         });
     };
@@ -408,10 +434,32 @@ komvc.ActionResult = (function (ApplicationViewModelHolder, $) {
     return ActionResult;
 })(komvc.ApplicationViewModelHolder, komvc.$);
 var preLoadedControllers = {};
-Controller = function(controllerName, requestedResources, controllerCallback){
+Controller = function(controllerName, requestedResources, controllerCallback, beforeActionRun, afterActionRun){
     var resources = [],
-        self = this;
+        self = this,
+        createActionCallback = function(action, beforeAction, afterAction){
+            if (typeof action === "function"
+                && (typeof beforeAction === "undefined" || typeof beforeAction === "function")
+                && (typeof afterAction === "undefined" || typeof afterAction === "function")) {
+                return function (params, context) {
+                    var a = action, ba = beforeAction, aa = afterAction;
+                    if (typeof ba === "function") {
+                        ba();
+                    }
+
+                    a.apply(this, [params, context]);
+
+                    if (typeof aa === "function") {
+                        aa();
+                    }
+                };
+            }
+
+            throw "Invalid parameters";
+        };
     if (typeof requestedResources  === "function"){
+        afterActionRun = beforeActionRun;
+        beforeActionRun = controllerCallback;
         controllerCallback = requestedResources;
         requestedResources = null;
     } else {
@@ -425,18 +473,21 @@ Controller = function(controllerName, requestedResources, controllerCallback){
         if(typeof preLoadedControllers[controllerName] === "undefined"){
             preLoadedControllers[controllerName] = {};
             preLoadedControllers[controllerName][methodType] = {};
-            preLoadedControllers[controllerName][methodType][actionName] = actionCallback;
+            preLoadedControllers[controllerName][methodType][actionName] = createActionCallback(actionCallback, beforeActionRun, afterActionRun);
         } else {
             var currentController = preLoadedControllers[controllerName];
             if(typeof currentController[methodType] === "undefined") {
                 currentController[methodType] = {};
             }
             if(typeof currentController[methodType][actionName] === "undefined"){
-                currentController[methodType][actionName] = actionCallback;
+                currentController[methodType][actionName] = createActionCallback(actionCallback, beforeActionRun, afterActionRun);
             }
         }
     };
+
+
     controllerCallback.apply(self, resources);
+
 };
     return komvc;
 }));
